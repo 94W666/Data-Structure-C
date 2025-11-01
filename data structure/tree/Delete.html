@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二叉树删除节点可视化 - 逐步执行版</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            color: #7f8c8d;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .tree-section {
+            flex: 1;
+            min-width: 600px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .controls-section {
+            flex: 0 0 350px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        #tree-canvas {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input[type="number"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            flex: 1;
+            min-width: 120px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        button:hover:not(:disabled) {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        button.reset {
+            background-color: #e74c3c;
+        }
+        
+        button.reset:hover:not(:disabled) {
+            background-color: #c0392b;
+        }
+        
+        button.next {
+            background-color: #2ecc71;
+        }
+        
+        button.next:hover:not(:disabled) {
+            background-color: #27ae60;
+        }
+        
+        .info-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .info-panel h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .cases {
+            margin-top: 15px;
+        }
+        
+        .case {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f0f8ff;
+        }
+        
+        .case strong {
+            color: #3498db;
+        }
+        
+        .steps {
+            margin-top: 20px;
+        }
+        
+        .step {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f0f8ff;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .step.active {
+            background-color: #e1f5fe;
+            border-left: 4px solid #3498db;
+        }
+        
+        .step.completed {
+            background-color: #e8f5e9;
+            border-left: 4px solid #2ecc71;
+        }
+        
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 50%;
+            margin-right: 10px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .step.active .step-number {
+            background-color: #e74c3c;
+        }
+        
+        .step.completed .step-number {
+            background-color: #2ecc71;
+        }
+        
+        .current-tree {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .current-tree h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .tree-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f0f8ff;
+            border-radius: 5px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        .execution-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .status-panel {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #fff3cd;
+            border-radius: 5px;
+            border: 1px solid #ffeaa7;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>二叉树删除节点可视化 - 逐步执行版</h1>
+            <p class="description">通过逐步执行演示二叉搜索树中删除节点的过程。点击"下一步"按钮逐步执行删除操作。</p>
+        </header>
+        
+        <div class="content">
+            <div class="tree-section">
+                <canvas id="tree-canvas"></canvas>
+                <div class="current-tree">
+                    <h3>当前树结构</h3>
+                    <div id="tree-structure">50 (30 (20 (10, 25), 40 (35, 45)), 70 (60, 80))</div>
+                    <div class="tree-stats">
+                        <div class="stat">
+                            <div class="stat-value" id="node-count">11</div>
+                            <div class="stat-label">节点数量</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="tree-height">4</div>
+                            <div class="stat-label">树高度</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="tree-type">平衡</div>
+                            <div class="stat-label">树状态</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls-section">
+                <div class="form-group">
+                    <label for="node-value">要删除的节点值:</label>
+                    <input type="number" id="node-value" min="1" max="99" placeholder="输入1-99之间的数字">
+                </div>
+                
+                <div class="buttons">
+                    <button id="delete-btn">开始删除</button>
+                    <button id="reset-btn" class="reset">重置树</button>
+                </div>
+                
+                <div class="execution-controls">
+                    <button id="prev-btn" disabled>上一步</button>
+                    <button id="next-btn" class="next" disabled>下一步</button>
+                </div>
+                
+                <div class="status-panel" id="status-panel">
+                    请选择要删除的节点值，然后点击"开始删除"
+                </div>
+                
+                <div class="info-panel">
+                    <h3>删除过程说明:</h3>
+                    <div class="steps">
+                        <div class="step" id="step-1">
+                            <span class="step-number">1</span>
+                            <span>查找要删除的节点</span>
+                        </div>
+                        <div class="step" id="step-2">
+                            <span class="step-number">2</span>
+                            <span>判断节点类型</span>
+                        </div>
+                        <div class="step" id="step-3">
+                            <span class="step-number">3</span>
+                            <span>执行删除操作</span>
+                        </div>
+                        <div class="step" id="step-4">
+                            <span class="step-number">4</span>
+                            <span>更新树结构</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-panel">
+                    <h3>二叉树删除节点规则:</h3>
+                    <div class="cases">
+                        <div class="case">
+                            <strong>情况 1:</strong> 删除叶子节点 - 直接删除该节点
+                        </div>
+                        <div class="case">
+                            <strong>情况 2:</strong> 删除只有一个子节点的节点 - 用其子节点替换该节点
+                        </div>
+                        <div class="case">
+                            <strong>情况 3:</strong> 删除有两个子节点的节点 - 用中序后继节点替换该节点
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>二叉树删除节点可视化程序 &copy; 2023 | 使用HTML、CSS和JavaScript实现</p>
+        </footer>
+    </div>
+
+    <script>
+        // 二叉树节点类
+        class TreeNode {
+            constructor(value) {
+                this.value = value;
+                this.left = null;
+                this.right = null;
+            }
+        }
+
+        // 二叉树类
+        class BinaryTree {
+            constructor() {
+                this.root = null;
+                this.nodePositions = new Map(); // 存储节点位置信息
+            }
+
+            // 插入节点
+            insert(value) {
+                const newNode = new TreeNode(value);
+                
+                if (this.root === null) {
+                    this.root = newNode;
+                } else {
+                    this.insertNode(this.root, newNode);
+                }
+            }
+
+            insertNode(node, newNode) {
+                if (newNode.value < node.value) {
+                    if (node.left === null) {
+                        node.left = newNode;
+                    } else {
+                        this.insertNode(node.left, newNode);
+                    }
+                } else {
+                    if (node.right === null) {
+                        node.right = newNode;
+                    } else {
+                        this.insertNode(node.right, newNode);
+                    }
+                }
+            }
+
+            // 查找最小值节点
+            findMinNode(node) {
+                if (node.left === null) {
+                    return node;
+                } else {
+                    return this.findMinNode(node.left);
+                }
+            }
+
+            // 删除节点
+            remove(value) {
+                this.root = this.removeNode(this.root, value);
+            }
+
+            removeNode(node, value) {
+                if (node === null) {
+                    return null;
+                } else if (value < node.value) {
+                    node.left = this.removeNode(node.left, value);
+                    return node;
+                } else if (value > node.value) {
+                    node.right = this.removeNode(node.right, value);
+                    return node;
+                } else {
+                    // 情况1: 叶子节点
+                    if (node.left === null && node.right === null) {
+                        node = null;
+                        return node;
+                    }
+                    
+                    // 情况2: 只有一个子节点
+                    if (node.left === null) {
+                        node = node.right;
+                        return node;
+                    } else if (node.right === null) {
+                        node = node.left;
+                        return node;
+                    }
+                    
+                    // 情况3: 有两个子节点
+                    const minNode = this.findMinNode(node.right);
+                    node.value = minNode.value;
+                    node.right = this.removeNode(node.right, minNode.value);
+                    return node;
+                }
+            }
+
+            // 获取树的高度
+            getHeight(node = this.root) {
+                if (node === null) {
+                    return 0;
+                }
+                const leftHeight = this.getHeight(node.left);
+                const rightHeight = this.getHeight(node.right);
+                return Math.max(leftHeight, rightHeight) + 1;
+            }
+
+            // 计算节点数量
+            getNodeCount(node = this.root) {
+                if (node === null) {
+                    return 0;
+                }
+                return 1 + this.getNodeCount(node.left) + this.getNodeCount(node.right);
+            }
+
+            // 计算节点位置
+            calculatePositions() {
+                this.nodePositions.clear();
+                const height = this.getHeight();
+                const canvasWidth = document.getElementById('tree-canvas').width;
+                this.calculateNodePositions(this.root, 0, canvasWidth / 2, 50, height, canvasWidth / 4);
+            }
+
+            calculateNodePositions(node, level, x, y, height, horizontalSpacing) {
+                if (node === null) return;
+                
+                const verticalSpacing = 80;
+                const currentHorizontalSpacing = horizontalSpacing / Math.pow(2, level);
+                
+                this.nodePositions.set(node.value, {
+                    x: x,
+                    y: y,
+                    node: node
+                });
+                
+                this.calculateNodePositions(node.left, level + 1, x - currentHorizontalSpacing, y + verticalSpacing, height, horizontalSpacing);
+                this.calculateNodePositions(node.right, level + 1, x + currentHorizontalSpacing, y + verticalSpacing, height, horizontalSpacing);
+            }
+
+            // 获取树的结构字符串
+            getTreeStructure(node = this.root) {
+                if (node === null) return "";
+                
+                let result = node.value.toString();
+                
+                if (node.left !== null || node.right !== null) {
+                    result += " (";
+                    if (node.left !== null) {
+                        result += this.getTreeStructure(node.left);
+                    }
+                    result += ", ";
+                    if (node.right !== null) {
+                        result += this.getTreeStructure(node.right);
+                    }
+                    result += ")";
+                }
+                
+                return result;
+            }
+        }
+
+        // 可视化类
+        class TreeVisualizer {
+            constructor(tree, canvasId) {
+                this.tree = tree;
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                
+                // 设置canvas尺寸
+                this.canvas.width = this.canvas.parentElement.offsetWidth;
+                this.canvas.height = 500;
+                
+                // 删除过程状态
+                this.deletionProcess = {
+                    active: false,
+                    currentStep: 0,
+                    targetValue: null,
+                    targetNode: null,
+                    nodeType: null,
+                    successorNode: null
+                };
+                
+                // 初始化树
+                this.initializeTree();
+            }
+
+            // 初始化树
+            initializeTree() {
+                // 创建示例二叉搜索树
+                const values = [50, 30, 70, 20, 40, 60, 80, 10, 25, 35, 45];
+                values.forEach(value => this.tree.insert(value));
+                
+                this.tree.calculatePositions();
+                this.drawTree();
+                this.updateTreeInfo();
+            }
+
+            // 绘制树
+            drawTree(highlightNodes = []) {
+                // 清空画布
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 绘制连接线
+                this.drawConnections(this.tree.root);
+                
+                // 绘制节点
+                for (const [value, position] of this.tree.nodePositions) {
+                    let nodeType = 'normal';
+                    
+                    // 检查是否需要高亮显示
+                    for (const highlight of highlightNodes) {
+                        if (highlight.value === value) {
+                            nodeType = highlight.type;
+                            break;
+                        }
+                    }
+                    
+                    this.drawNode(position.x, position.y, value, nodeType);
+                }
+            }
+
+            // 绘制节点
+            drawNode(x, y, value, type = 'normal') {
+                this.ctx.beginPath();
+                
+                // 根据节点类型设置颜色
+                switch(type) {
+                    case 'normal':
+                        this.ctx.fillStyle = '#3498db';
+                        break;
+                    case 'highlight':
+                        this.ctx.fillStyle = '#e74c3c';
+                        break;
+                    case 'target':
+                        this.ctx.fillStyle = '#e67e22';
+                        break;
+                    case 'successor':
+                        this.ctx.fillStyle = '#2ecc71';
+                        break;
+                    case 'visited':
+                        this.ctx.fillStyle = '#9b59b6';
+                        break;
+                }
+                
+                this.ctx.arc(x, y, 20, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // 绘制节点值
+                this.ctx.fillStyle = 'white';
+                this.ctx.font = 'bold 16px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.fillText(value, x, y);
+            }
+
+            // 绘制连接线
+            drawConnections(node) {
+                if (node === null) return;
+                
+                const nodePos = this.tree.nodePositions.get(node.value);
+                
+                if (node.left !== null) {
+                    const leftPos = this.tree.nodePositions.get(node.left.value);
+                    this.drawLine(nodePos.x, nodePos.y, leftPos.x, leftPos.y);
+                    this.drawConnections(node.left);
+                }
+                
+                if (node.right !== null) {
+                    const rightPos = this.tree.nodePositions.get(node.right.value);
+                    this.drawLine(nodePos.x, nodePos.y, rightPos.x, rightPos.y);
+                    this.drawConnections(node.right);
+                }
+            }
+
+            // 绘制线条
+            drawLine(x1, y1, x2, y2) {
+                this.ctx.beginPath();
+                this.ctx.strokeStyle = '#7f8c8d';
+                this.ctx.lineWidth = 2;
+                this.ctx.moveTo(x1, y1);
+                this.ctx.lineTo(x2, y2);
+                this.ctx.stroke();
+            }
+
+            // 开始删除过程
+            startDeletion(value) {
+                this.deletionProcess.active = true;
+                this.deletionProcess.currentStep = 0;
+                this.deletionProcess.targetValue = parseInt(value);
+                this.deletionProcess.targetNode = this.findNode(this.tree.root, this.deletionProcess.targetValue);
+                
+                if (!this.deletionProcess.targetNode) {
+                    this.updateStatus("未找到值为 " + value + " 的节点！");
+                    this.deletionProcess.active = false;
+                    return false;
+                }
+                
+                // 确定节点类型
+                if (this.deletionProcess.targetNode.left === null && this.deletionProcess.targetNode.right === null) {
+                    this.deletionProcess.nodeType = 'leaf';
+                } else if (this.deletionProcess.targetNode.left === null || this.deletionProcess.targetNode.right === null) {
+                    this.deletionProcess.nodeType = 'single';
+                } else {
+                    this.deletionProcess.nodeType = 'double';
+                    this.deletionProcess.successorNode = this.findMinNode(this.deletionProcess.targetNode.right);
+                }
+                
+                this.updateStepDisplay();
+                this.updateStatus("已找到要删除的节点。点击\"下一步\"继续。");
+                return true;
+            }
+
+            // 执行下一步
+            nextStep() {
+                if (!this.deletionProcess.active) return;
+                
+                this.deletionProcess.currentStep++;
+                this.updateStepDisplay();
+                
+                switch(this.deletionProcess.currentStep) {
+                    case 1:
+                        this.updateStatus("正在查找要删除的节点...");
+                        this.drawTree([{value: this.deletionProcess.targetValue, type: 'target'}]);
+                        break;
+                    case 2:
+                        this.updateStatus("已确定节点类型: " + 
+                            (this.deletionProcess.nodeType === 'leaf' ? "叶子节点" : 
+                             this.deletionProcess.nodeType === 'single' ? "单子节点" : "双子节点"));
+                        break;
+                    case 3:
+                        if (this.deletionProcess.nodeType === 'double') {
+                            this.updateStatus("找到中序后继节点: " + this.deletionProcess.successorNode.value);
+                            this.drawTree([
+                                {value: this.deletionProcess.targetValue, type: 'target'},
+                                {value: this.deletionProcess.successorNode.value, type: 'successor'}
+                            ]);
+                        } else {
+                            this.updateStatus("执行删除操作...");
+                            this.executeDeletion();
+                        }
+                        break;
+                    case 4:
+                        if (this.deletionProcess.nodeType === 'double') {
+                            this.updateStatus("执行删除操作...");
+                            this.executeDeletion();
+                        } else {
+                            this.completeDeletion();
+                        }
+                        break;
+                    case 5:
+                        this.completeDeletion();
+                        break;
+                }
+            }
+
+            // 执行上一步
+            prevStep() {
+                if (!this.deletionProcess.active || this.deletionProcess.currentStep <= 0) return;
+                
+                this.deletionProcess.currentStep--;
+                this.updateStepDisplay();
+                
+                // 根据步骤更新状态和显示
+                switch(this.deletionProcess.currentStep) {
+                    case 0:
+                        this.updateStatus("已找到要删除的节点。点击\"下一步\"继续。");
+                        this.drawTree();
+                        break;
+                    case 1:
+                        this.updateStatus("正在查找要删除的节点...");
+                        this.drawTree([{value: this.deletionProcess.targetValue, type: 'target'}]);
+                        break;
+                    case 2:
+                        this.updateStatus("已确定节点类型: " + 
+                            (this.deletionProcess.nodeType === 'leaf' ? "叶子节点" : 
+                             this.deletionProcess.nodeType === 'single' ? "单子节点" : "双子节点"));
+                        break;
+                    case 3:
+                        if (this.deletionProcess.nodeType === 'double') {
+                            this.updateStatus("找到中序后继节点: " + this.deletionProcess.successorNode.value);
+                            this.drawTree([
+                                {value: this.deletionProcess.targetValue, type: 'target'},
+                                {value: this.deletionProcess.successorNode.value, type: 'successor'}
+                            ]);
+                        }
+                        break;
+                }
+            }
+
+            // 执行删除操作
+            executeDeletion() {
+                this.tree.remove(this.deletionProcess.targetValue);
+                this.tree.calculatePositions();
+                this.drawTree();
+                this.updateTreeInfo();
+            }
+
+            // 完成删除
+            completeDeletion() {
+                this.updateStatus("删除完成！节点 " + this.deletionProcess.targetValue + " 已从树中删除。");
+                this.deletionProcess.active = false;
+                document.getElementById('next-btn').disabled = true;
+                document.getElementById('prev-btn').disabled = true;
+                document.getElementById('delete-btn').disabled = false;
+            }
+
+            // 更新步骤显示
+            updateStepDisplay() {
+                const steps = document.querySelectorAll('.step');
+                
+                steps.forEach((step, index) => {
+                    step.classList.remove('active', 'completed');
+                    
+                    if (index < this.deletionProcess.currentStep) {
+                        step.classList.add('completed');
+                    } else if (index === this.deletionProcess.currentStep) {
+                        step.classList.add('active');
+                    }
+                });
+                
+                // 更新按钮状态
+                document.getElementById('prev-btn').disabled = this.deletionProcess.currentStep === 0;
+                document.getElementById('next-btn').disabled = !this.deletionProcess.active || 
+                    this.deletionProcess.currentStep >= (this.deletionProcess.nodeType === 'double' ? 5 : 4);
+            }
+
+            // 更新状态信息
+            updateStatus(message) {
+                document.getElementById('status-panel').textContent = message;
+            }
+
+            // 查找节点
+            findNode(node, value) {
+                if (node === null) return null;
+                
+                if (value < node.value) {
+                    return this.findNode(node.left, value);
+                } else if (value > node.value) {
+                    return this.findNode(node.right, value);
+                } else {
+                    return node;
+                }
+            }
+
+            // 查找最小节点
+            findMinNode(node) {
+                if (node.left === null) {
+                    return node;
+                } else {
+                    return this.findMinNode(node.left);
+                }
+            }
+
+            // 重置树
+            resetTree() {
+                this.tree.root = null;
+                this.tree.nodePositions.clear();
+                this.deletionProcess.active = false;
+                this.deletionProcess.currentStep = 0;
+                this.initializeTree();
+                
+                document.getElementById('next-btn').disabled = true;
+                document.getElementById('prev-btn').disabled = true;
+                document.getElementById('delete-btn').disabled = false;
+                
+                this.updateStatus("树已重置。请选择要删除的节点值，然后点击\"开始删除\"");
+                this.updateStepDisplay();
+            }
+
+            // 更新树信息
+            updateTreeInfo() {
+                document.getElementById('tree-structure').textContent = this.tree.getTreeStructure();
+                document.getElementById('node-count').textContent = this.tree.getNodeCount();
+                document.getElementById('tree-height').textContent = this.tree.getHeight();
+                
+                const height = this.tree.getHeight();
+                const nodeCount = this.tree.getNodeCount();
+                const idealHeight = Math.floor(Math.log2(nodeCount)) + 1;
+                
+                if (height <= idealHeight + 1) {
+                    document.getElementById('tree-type').textContent = "平衡";
+                } else {
+                    document.getElementById('tree-type').textContent = "不平衡";
+                }
+            }
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', function() {
+            const tree = new BinaryTree();
+            const visualizer = new TreeVisualizer(tree, 'tree-canvas');
+            
+            // 开始删除按钮事件
+            document.getElementById('delete-btn').addEventListener('click', function() {
+                const value = document.getElementById('node-value').value;
+                if (value) {
+                    if (visualizer.startDeletion(value)) {
+                        document.getElementById('delete-btn').disabled = true;
+                        document.getElementById('next-btn').disabled = false;
+                    }
+                } else {
+                    visualizer.updateStatus('请输入要删除的节点值');
+                }
+            });
+            
+            // 下一步按钮事件
+            document.getElementById('next-btn').addEventListener('click', function() {
+                visualizer.nextStep();
+            });
+            
+            // 上一步按钮事件
+            document.getElementById('prev-btn').addEventListener('click', function() {
+                visualizer.prevStep();
+            });
+            
+            // 重置按钮事件
+            document.getElementById('reset-btn').addEventListener('click', function() {
+                visualizer.resetTree();
+            });
+            
+            // 窗口调整大小时重绘树
+            window.addEventListener('resize', function() {
+                visualizer.canvas.width = visualizer.canvas.parentElement.offsetWidth;
+                visualizer.tree.calculatePositions();
+                visualizer.drawTree();
+            });
+        });
+    </script>
+</body>
+</html>
