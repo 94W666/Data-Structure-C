@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//定义对的节点结构体
+//定义队的节点结构体
 typedef struct QNode
 {
     char data;
